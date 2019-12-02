@@ -56,6 +56,10 @@ package() {
         install -D -m644 "${srcdir}/${_pkg}/kernel/nvidia-uvm.ko" \
             "${pkgdir}/usr/lib/modules/${_extramodules}/nvidia-uvm.ko"
     fi
+	echo -e "Signing modules with kernel key...\n"
+    for i in nvidia.ko nvidia-{modeset,drm,uvm}.ko; do
+		sign-file54.sh "${pkgdir}/usr/lib/modules/${_extramodules}/$i"
+    done
     gzip -9 "${pkgdir}/usr/lib/modules/${_extramodules}/"*.ko
     sed -i -e "s/EXTRAMODULES='.*'/EXTRAMODULES='${_extramodules}'/" "${startdir}/nvidia.install"
 }

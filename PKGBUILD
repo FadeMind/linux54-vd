@@ -22,7 +22,7 @@ makedepends=('xmlto' 'docbook-xsl' 'kmod' 'inetutils' 'bc' 'elfutils' 'git')
 options=('!strip')
 source=(https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-${pkgver}.tar.{xz,sign}
         # the main kernel config files
-        'config.x86_64' 'config.vd'
+        'config.x86_64' 'config.vd' 'x509.genkey'
         # ARCH Patches
         0001-ZEN-Add-sysctl-and-CONFIG-to-disallow-unprivileged-CLONE_NEWUSER.patch
         # MANJARO Patches
@@ -44,7 +44,8 @@ source=(https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-${pkgver}.tar.{xz,sig
 sha256sums=('a7d48bb324d53e421ffbe4da40087b3c0c5112707e5f3d827c30118542c74fd9'
             'SKIP'
             '1f2a113cf9df4dc1df2e7b5dbe307e52b92f35572ead855492ff33dd0ee09acb'
-            'aa14ab02031ef9bec74941eb89097bbfcd294aaadb9461a0ed5a17208dffc474'
+            'a49092547ca5a5275f2829d97a7f22051220b4b7c6b67a5aecac355ecfae6be7'
+            'ab010dc5ef6ce85d352956e5996d242246ecd0912b30f0b72025c38eadff8cd5'
             '7685d526bbdbfa795986591a70071c960ff572f56d3501774861728a9df8664c'
             '7a2758f86dd1339f0f1801de2dbea059b55bf3648e240878b11e6d6890d3089c'
             '1fd4518cb0518d68f8db879f16ce16455fdc2200ed232f9e27fb5f1f3b5e4906'
@@ -92,7 +93,23 @@ prepare() {
   patch -Np1 -i ../0001-tune-vm-and-vfs-settings.patch
   patch -Np1 -i ../0002-tune-cfs-scheduler.patch
 
-  cat "${srcdir}/config.vd" > ./.config
+  cat ../x509.genkey > ./certs/x509.genkey
+  cat ../config.vd > ./.config
+
+    # add key
+  echo "======== KERNEL KEY GENERATION ========"
+  read -p "Enter the full path to the key if you have one, else enter 'n': " UCHOICE
+  if [[ ${UCHOICE} != "n" ]]; then
+    if [[ -f ${UCHOICE} ]]; then
+      cat ../x509.genkey > ./certs/x509.genkey
+      cat ${UCHOICE} > ./certs/vd54-kernel-key.pem || exit 1
+    else
+      echo "Path does not exist. Aborting..." ; exit 2
+    fi
+  else
+    cat ../x509.genkey > ./certs/x509.genkey
+    sed -i 's/vd54\-kernel\-key/signing\_key/' ./.config || exit 1
+  fi
 
   if [ "${_kernelname}" != "" ]; then
     sed -i "s|CONFIG_LOCALVERSION=.*|CONFIG_LOCALVERSION=\"${_kernelname}\"|g" ./.config
