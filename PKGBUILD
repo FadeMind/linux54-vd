@@ -37,7 +37,7 @@ source=(https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-${pkgver}.tar.{xz,sig
 	0002-clearlinux-add-config-raid6.patch::https://raw.githubusercontent.com/clearlinux-pkgs/linux/master/0109-raid6-add-Kconfig-option-to-skip-raid6-benchmarking.patch
 	0003-clearlinux-init-ata-before-graphics.patch::https://raw.githubusercontent.com/clearlinux-pkgs/linux/master/0110-Initialize-ata-before-graphics.patch
 	add-nvme-hwmon-temp.patch
-	0001-tune-vm-writeback-and-page-readahead.patch
+	0001-tune-vm-and-vfs-settings.patch
 	0002-tune-cfs-scheduler.patch
 	block-optimisations-hho.patch
 )
@@ -55,9 +55,9 @@ sha256sums=('a7d48bb324d53e421ffbe4da40087b3c0c5112707e5f3d827c30118542c74fd9'
             '819e206f4ef8c50fbe5112ea8566c5193fee522c7f28396af28d1dfdc3546ae0'
             '672343639203797b194025f864845dea8097d4650b7af19e1cacdd2bfe9013b0'
             '6cf992514973b94cffe81b5547a8c76c0ccd03f7bafc1a234c5af4ba34cc1a9d'
-            'fa57b3d150ec741870fd67633b83084bb9947ed1efb11229217e0a4fd3d5669d'
-            '4e05b602bcc7f9604e1c8555aa2c5db7af96e8163230e12eb9bbef3aff474519'
-            '408a368a64bebd9169f81f9c6f11f5e5515f8068f5b2beb32d20635c6dd5d3a0'
+            'c6944879f5cdfd335a3adc75b6f6194d127ad93d4dd5bf90d2ad505e83c9b6d2'
+            'f4041dc77564ee6de09c1c02c59068b8eceb6fbdbe60158acdec0a0cfb5cb3f7'
+            'f4f42dd737f2398a27d674cb7cb666f299b15542f05f35dcd4b8e1835a845c10'
             '74eb904dea0162eace78cbf6ab68bb3d151522c84efc3c55ba0c23a21db126c2')
 prepare() {
   cd "${srcdir}/linux-${pkgver}"
@@ -89,7 +89,7 @@ prepare() {
   patch -Np1 -i ../cpu-optimisations-graysky.patch
   patch -Np1 -i ../add-nvme-hwmon-temp.patch
   patch -Np1 -i ../block-optimisations-hho.patch
-  patch -Np1 -i ../0001-tune-vm-writeback-and-page-readahead.patch
+  patch -Np1 -i ../0001-tune-vm-and-vfs-settings.patch
   patch -Np1 -i ../0002-tune-cfs-scheduler.patch
 
   cat "${srcdir}/config.vd" > ./.config

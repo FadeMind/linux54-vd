@@ -1,14 +1,33 @@
-From 48edb960daa7a85f2c6fb74815a632bb173131cd Mon Sep 17 00:00:00 2001
+From 874233843a5058eb0bb418051baab7d9df49db8b Mon Sep 17 00:00:00 2001
 From: torvic9 <torvic9@mailbox.org>
-Date: Mon, 2 Dec 2019 10:59:12 +0100
-Subject: [PATCH] tune vm writeback and page readahead
+Date: Mon, 2 Dec 2019 20:17:46 +0100
+Subject: [PATCH] tune vm and vfs settings
 
 Signed-off-by: torvic9 <torvic9@mailbox.org>
 ---
+ fs/dcache.c         | 2 +-
  include/linux/mm.h  | 2 +-
  mm/page-writeback.c | 6 +++---
- 2 files changed, 4 insertions(+), 4 deletions(-)
+ mm/vmscan.c         | 2 +-
+ 4 files changed, 6 insertions(+), 6 deletions(-)
 
+diff --git a/fs/dcache.c b/fs/dcache.c
+index e88cf0554e65..e282ee1d74e5 100644
+--- a/fs/dcache.c
++++ b/fs/dcache.c
+@@ -69,11 +69,11 @@
+  *       dentry->d_lock
+  *
+  * If no ancestor relationship:
+  * arbitrary, since it's serialized on rename_lock
+  */
+-int sysctl_vfs_cache_pressure __read_mostly = 100;
++int sysctl_vfs_cache_pressure __read_mostly = 70;
+ EXPORT_SYMBOL_GPL(sysctl_vfs_cache_pressure);
+ 
+ __cacheline_aligned_in_smp DEFINE_SEQLOCK(rename_lock);
+ 
+ EXPORT_SYMBOL(rename_lock);
 diff --git a/include/linux/mm.h b/include/linux/mm.h
 index a2adf95b3f9c..d7823ee21744 100644
 --- a/include/linux/mm.h
@@ -68,6 +87,23 @@ index 50055d2e4ea8..9d800356f77a 100644
  
  /*
   * The longest time for which data is allowed to remain dirty
+diff --git a/mm/vmscan.c b/mm/vmscan.c
+index ee4eecc7e1c2..6d28dee5cbfb 100644
+--- a/mm/vmscan.c
++++ b/mm/vmscan.c
+@@ -162,11 +162,11 @@ struct scan_control {
+ #endif
+ 
+ /*
+  * From 0 .. 100.  Higher means more swappy.
+  */
+-int vm_swappiness = 60;
++int vm_swappiness = 30;
+ /*
+  * The total number of pages which are beyond the high watermark within all
+  * zones.
+  */
+ unsigned long vm_total_pages;
 -- 
 2.24.0
 
