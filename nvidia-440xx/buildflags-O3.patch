@@ -1,0 +1,33 @@
+diff --git a/kernel/Kbuild b/kernel/Kbuild
+index 2770d1a..f120062 100644
+--- a/kernel/Kbuild
++++ b/kernel/Kbuild
+@@ -62,10 +62,11 @@ $(foreach _module, $(NV_KERNEL_MODULES), \
+ # is deprecated since 2.6.24 in favor of ccflags-y, but we need to support
+ # older kernels which do not have ccflags-y. Newer kernels append
+ # $(EXTRA_CFLAGS) to ccflags-y for compatibility.
+ #
+ 
++EXTRA_CFLAGS += -O3
+ EXTRA_CFLAGS += -I$(src)/common/inc
+ EXTRA_CFLAGS += -I$(src)
+ EXTRA_CFLAGS += -Wall -MD $(DEFINES) $(INCLUDES) -Wno-cast-qual -Wno-error -Wno-format-extra-args
+ EXTRA_CFLAGS += -D__KERNEL__ -DMODULE -DNVRM -DNV_VERSION_STRING=\"440.36\" -Wno-unused-function -Wuninitialized -fno-strict-aliasing -mno-red-zone -mcmodel=kernel -DNV_UVM_ENABLE
+ EXTRA_CFLAGS += $(call cc-option,-Werror=undef,)
+diff --git a/kernel/conftest.sh b/kernel/conftest.sh
+index a54e2c0..80c29a6 100755
+--- a/kernel/conftest.sh
++++ b/kernel/conftest.sh
+@@ -144,11 +144,11 @@ test_headers() {
+ 
+     translate_and_preprocess_header_files $FILES
+ }
+ 
+ build_cflags() {
+-    BASE_CFLAGS="-O2 -D__KERNEL__ \
++    BASE_CFLAGS="-O3 -D__KERNEL__ \
+ -DKBUILD_BASENAME=\"#conftest$$\" -DKBUILD_MODNAME=\"#conftest$$\" \
+ -nostdinc -isystem $ISYSTEM"
+ 
+     if [ "$OUTPUT" != "$SOURCES" ]; then
+         OUTPUT_CFLAGS="-I$OUTPUT/include2 -I$OUTPUT/include"
