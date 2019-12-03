@@ -22,12 +22,14 @@ makedepends=('xmlto' 'docbook-xsl' 'kmod' 'inetutils' 'bc' 'elfutils' 'git')
 options=('!strip')
 source=(https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-${pkgver}.tar.{xz,sign}
         # the main kernel config files
-        'config.x86_64' 'config.vd' 'x509.genkey'
+        'config.x86_64' 'config.vd' 'config.x200' 'x509.genkey'
         # ARCH Patches
         0001-ZEN-Add-sysctl-and-CONFIG-to-disallow-unprivileged-CLONE_NEWUSER.patch
         # MANJARO Patches
         '0001-nonupstream-navi10-vfio-reset.patch'
         '0001-drm-amdgpu-Add-DC-feature-mask-to-disable-fractional-pwm.patch'
+	# BMQ scheduler
+	#bmq-5.4.y-20191125.patch::https://gitlab.com/alfredchen/bmq/raw/master/5.4/bmq_v5.4-r0.patch
         # vd
 	0001-futex.patch::https://raw.githubusercontent.com/sirlucjan/kernel-patches/master/5.4/futex-patches-sep/0001-futex-Split-key-setup-from-key-queue-locking-and-rea.patch
 	0002-futex.patch::https://raw.githubusercontent.com/sirlucjan/kernel-patches/master/5.4/futex-patches-sep/0002-futex-Implement-mechanism-to-wait-on-any-of-several-.patch
@@ -39,7 +41,16 @@ source=(https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-${pkgver}.tar.{xz,sig
 	add-nvme-hwmon-temp.patch
 	0001-tune-vm-and-vfs-settings.patch
 	0002-tune-cfs-scheduler.patch
+	0003-optimise-module-compression.patch
 	block-optimisations-hho.patch
+	# amdgpu backports
+	amdgpu-5.5-backports.patch
+	#amdgpu-drm-next-20191009.patch::https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/patch/drivers/gpu/drm?id=3275a71e76fac5bc276f0d60e027b18c2e8d7a5b
+	#amdgpu-drm-next-20191025.patch::https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/patch/drivers/gpu/drm?id=60845e34f0c5c19a9e86af477b429993952f585b
+	#amdgpu-drm-next-20191101.patch::https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/patch/drivers/gpu/drm?id=8a86b00a437ec06b298477463c7a9b8774570507
+	#amdgpu-drm-next-20191108.patch::https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/patch/drivers/gpu/drm?id=0990ca235d9145ec40ed002f8ff7f6e1a910db4f
+	#amdgpu-drm-next-20191115.patch::https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/patch/drivers/gpu/drm?id=c22fe762ba91380d3167b742bab4ff5e99ad84a2
+	#amdgpu-drm-next-20191122.patch::https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/patch/drivers/gpu/drm?id=acc61b8929365e63a3e8c8c8913177795aa45594
 )
 validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
@@ -49,6 +60,7 @@ sha256sums=('a7d48bb324d53e421ffbe4da40087b3c0c5112707e5f3d827c30118542c74fd9'
             'SKIP'
             '1f2a113cf9df4dc1df2e7b5dbe307e52b92f35572ead855492ff33dd0ee09acb'
             'a49092547ca5a5275f2829d97a7f22051220b4b7c6b67a5aecac355ecfae6be7'
+            'e65a0a83f83c92075d04fe7c14c380915134d828c3708b7d60cc2a61f5c55f0e'
             'ab010dc5ef6ce85d352956e5996d242246ecd0912b30f0b72025c38eadff8cd5'
             '7685d526bbdbfa795986591a70071c960ff572f56d3501774861728a9df8664c'
             '7a2758f86dd1339f0f1801de2dbea059b55bf3648e240878b11e6d6890d3089c'
@@ -63,9 +75,12 @@ sha256sums=('a7d48bb324d53e421ffbe4da40087b3c0c5112707e5f3d827c30118542c74fd9'
             'c6944879f5cdfd335a3adc75b6f6194d127ad93d4dd5bf90d2ad505e83c9b6d2'
             'f4041dc77564ee6de09c1c02c59068b8eceb6fbdbe60158acdec0a0cfb5cb3f7'
             'f4f42dd737f2398a27d674cb7cb666f299b15542f05f35dcd4b8e1835a845c10'
-            '74eb904dea0162eace78cbf6ab68bb3d151522c84efc3c55ba0c23a21db126c2')
+            '0d6fbf9a5206529d6791d41767ec254f0040d053713092b5fbb21fbe7f3604b7'
+            '74eb904dea0162eace78cbf6ab68bb3d151522c84efc3c55ba0c23a21db126c2'
+            '0d82c6109d61b4d26ec075fb06e211f44e24130c5705d8879e4ceeb80b02d461')
             
-export KBUILD_BUILD_TIMESTAMP="$(date -Ru${SOURCE_DATE_EPOCH:+d @$SOURCE_DATE_EPOCH})"
+export KBUILD_BUILD_USER=builder
+export KBUILD_BUILD_HOST=manjaro
             
 prepare() {
   cd "${srcdir}/linux-${pkgver}"
@@ -81,13 +96,24 @@ prepare() {
   patch -Np1 -i ../0001-ZEN-Add-sysctl-and-CONFIG-to-disallow-unprivileged-CLONE_NEWUSER.patch
 
   # https://bugzilla.kernel.org/show_bug.cgi?id=204957
-  patch -Np1 -i ../0001-drm-amdgpu-Add-DC-feature-mask-to-disable-fractional-pwm.patch
+  #patch -Np1 -i ../0001-drm-amdgpu-Add-DC-feature-mask-to-disable-fractional-pwm.patch
 
   # TODO: remove when AMD properly fixes it!
   # INFO: this is a hack and won't be upstreamed
   # https://forum.level1techs.com/t/145666/86
   # https://forum.manjaro.org/t/107820/11
   patch -Np1 -i ../0001-nonupstream-navi10-vfio-reset.patch
+
+  # amdgpu backports
+  patch -Np1 -i ../amdgpu-5.5-backports.patch
+  #local arr=(20191009 20191025 20191101 20191108 20191115 20191122)
+  #for i in "${arr[@]}"; do
+  #	msg2 "Applying amdgpu backports from $i"
+  #	patch -fNp1 -i ../amdgpu-drm-next-$i.patch ; 
+  #done
+
+  # BMQ scheduler
+  #patch -Np1 -i ../bmq-5.4.y-20191125.patch
 
   # vd
   patch -Np1 -i ../0001-futex.patch
@@ -101,12 +127,13 @@ prepare() {
   patch -Np1 -i ../block-optimisations-hho.patch
   patch -Np1 -i ../0001-tune-vm-and-vfs-settings.patch
   patch -Np1 -i ../0002-tune-cfs-scheduler.patch
+  patch -Np1 -i ../0003-optimise-module-compression.patch
 
   cat ../x509.genkey > ./certs/x509.genkey
   cat ../config.vd > ./.config
 
   # add key
-  msg2 "==== KERNEL KEY GENERATION ===="
+  msg2 "KERNEL KEY GENERATION"
   read -p "Enter the full path to the key if you have one, else enter 'n': " UCHOICE
   if [[ ${UCHOICE} != "n" ]]; then
     if [[ -f ${UCHOICE} ]]; then
@@ -139,13 +166,6 @@ prepare() {
   msg2 "Prepared %s version %s" "$pkgbase" "$(<version)"
   read -p "Enter 'y' for nconfig: " NCONFIG
   if [[ $NCONFIG = "y" ]] ; then make nconfig ; fi
-
-  # Configure the kernel. Replace the line below with one of your choice.
-  # make menuconfig # CLI menu for configuration
-  # make nconfig # new CLI menu for configuration
-  # make xconfig # X-based configuration
-  # make oldconfig # using old config from previous kernel version
-  # ... or manually edit .config
 
   # rewrite configuration
   yes "" | make config >/dev/null

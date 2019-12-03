@@ -1,0 +1,34 @@
+From 33fa5328f93753248f9f1e2f44622c202a785dbb Mon Sep 17 00:00:00 2001
+From: torvic9 <torvic9@mailbox.org>
+Date: Tue, 3 Dec 2019 10:33:31 +0100
+Subject: [PATCH] optimise module compression
+
+Signed-off-by: torvic9 <torvic9@mailbox.org>
+---
+ Makefile | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 641a62423fd6..d0f6cf21a252 100644
+--- a/Makefile
++++ b/Makefile
+@@ -976,14 +976,14 @@ export mod_strip_cmd
+ # or CONFIG_MODULE_COMPRESS_XZ.
+ 
+ mod_compress_cmd = true
+ ifdef CONFIG_MODULE_COMPRESS
+   ifdef CONFIG_MODULE_COMPRESS_GZIP
+-    mod_compress_cmd = gzip -n -f
++    mod_compress_cmd = gzip -4 -n -f
+   endif # CONFIG_MODULE_COMPRESS_GZIP
+   ifdef CONFIG_MODULE_COMPRESS_XZ
+-    mod_compress_cmd = xz -f
++    mod_compress_cmd = xz -T2 --lzma2=dict=2M -f
+   endif # CONFIG_MODULE_COMPRESS_XZ
+ endif # CONFIG_MODULE_COMPRESS
+ export mod_compress_cmd
+ 
+ ifdef CONFIG_MODULE_SIG_ALL
+-- 
+2.24.0
+
