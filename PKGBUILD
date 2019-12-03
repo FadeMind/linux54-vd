@@ -9,12 +9,12 @@
 
 pkgbase=linux54-vd
 pkgname=('linux54-vd' 'linux54-vd-headers')
-_kernelname=-vd
 _basekernel=5.4
-_basever=54
+_kernelname=-vd
 _sub=1
+kernelbase=${_basekernel}${_kernelname}
 pkgver=${_basekernel}.${_sub}
-pkgrel=3
+pkgrel=4
 arch=('x86_64')
 url="http://www.kernel.org/"
 license=('GPL2')
@@ -41,6 +41,10 @@ source=(https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-${pkgver}.tar.{xz,sig
 	0002-tune-cfs-scheduler.patch
 	block-optimisations-hho.patch
 )
+validpgpkeys=(
+  'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
+  '647F28654894E3BD457199BE38DBBDC86092693E'  # Greg Kroah-Hartman
+)
 sha256sums=('a7d48bb324d53e421ffbe4da40087b3c0c5112707e5f3d827c30118542c74fd9'
             'SKIP'
             '1f2a113cf9df4dc1df2e7b5dbe307e52b92f35572ead855492ff33dd0ee09acb'
@@ -60,6 +64,9 @@ sha256sums=('a7d48bb324d53e421ffbe4da40087b3c0c5112707e5f3d827c30118542c74fd9'
             'f4041dc77564ee6de09c1c02c59068b8eceb6fbdbe60158acdec0a0cfb5cb3f7'
             'f4f42dd737f2398a27d674cb7cb666f299b15542f05f35dcd4b8e1835a845c10'
             '74eb904dea0162eace78cbf6ab68bb3d151522c84efc3c55ba0c23a21db126c2')
+            
+export KBUILD_BUILD_TIMESTAMP="$(date -Ru${SOURCE_DATE_EPOCH:+d @$SOURCE_DATE_EPOCH})"
+            
 prepare() {
   cd "${srcdir}/linux-${pkgver}"
 
@@ -68,17 +75,19 @@ prepare() {
   # enable only if you have "gen-stable-queue-patch.sh" executed before
   #patch -Np1 -i "${srcdir}/prepatch-${_basekernel}`date +%Y%m%d`"
 
+  msg2 "Applying patches..."
+  
   # disable USER_NS for non-root users by default
   patch -Np1 -i ../0001-ZEN-Add-sysctl-and-CONFIG-to-disallow-unprivileged-CLONE_NEWUSER.patch
 
   # https://bugzilla.kernel.org/show_bug.cgi?id=204957
-  patch -Np1 -i "${srcdir}/0001-drm-amdgpu-Add-DC-feature-mask-to-disable-fractional-pwm.patch"
+  patch -Np1 -i ../0001-drm-amdgpu-Add-DC-feature-mask-to-disable-fractional-pwm.patch
 
   # TODO: remove when AMD properly fixes it!
   # INFO: this is a hack and won't be upstreamed
   # https://forum.level1techs.com/t/145666/86
   # https://forum.manjaro.org/t/107820/11
-  patch -Np1 -i "${srcdir}/0001-nonupstream-navi10-vfio-reset.patch"
+  patch -Np1 -i ../0001-nonupstream-navi10-vfio-reset.patch
 
   # vd
   patch -Np1 -i ../0001-futex.patch
@@ -96,19 +105,17 @@ prepare() {
   cat ../x509.genkey > ./certs/x509.genkey
   cat ../config.vd > ./.config
 
-    # add key
-  echo "======== KERNEL KEY GENERATION ========"
+  # add key
+  msg2 "==== KERNEL KEY GENERATION ===="
   read -p "Enter the full path to the key if you have one, else enter 'n': " UCHOICE
   if [[ ${UCHOICE} != "n" ]]; then
     if [[ -f ${UCHOICE} ]]; then
-      cat ../x509.genkey > ./certs/x509.genkey
-      cat ${UCHOICE} > ./certs/vd54-kernel-key.pem || exit 1
+      cat ${UCHOICE} > ./certs/vd54-kernel-key.pem || exit 2
     else
       echo "Path does not exist. Aborting..." ; exit 2
     fi
   else
-    cat ../x509.genkey > ./certs/x509.genkey
-    sed -i 's/vd54\-kernel\-key/signing\_key/' ./.config || exit 1
+    sed -i 's/vd54\-kernel\-key/signing\_key/' ./.config || exit 2
   fi
 
   if [ "${_kernelname}" != "" ]; then
@@ -127,13 +134,17 @@ prepare() {
 
   # get kernel version
   make prepare
+  
+  make -s kernelrelease > version
+  msg2 "Prepared %s version %s" "$pkgbase" "$(<version)"
+  read -p "Enter 'y' for nconfig: " NCONFIG
+  if [[ $NCONFIG = "y" ]] ; then make nconfig ; fi
 
-  # load configuration
   # Configure the kernel. Replace the line below with one of your choice.
-  #make menuconfig # CLI menu for configuration
-  make nconfig # new CLI menu for configuration
-  #make xconfig # X-based configuration
-  #make oldconfig # using old config from previous kernel version
+  # make menuconfig # CLI menu for configuration
+  # make nconfig # new CLI menu for configuration
+  # make xconfig # X-based configuration
+  # make oldconfig # using old config from previous kernel version
   # ... or manually edit .config
 
   # rewrite configuration
@@ -158,38 +169,41 @@ package_linux54-vd() {
   KARCH=x86
 
   # get kernel version
-  _kernver="$(make LOCALVERSION= kernelrelease)"
+  #_kernver="$(make LOCALVERSION= kernelrelease)"
+  
+  local kernver="$(<version)"
+  local modulesdir="$pkgdir/usr/lib/modules/$kernver"
 
   mkdir -p "${pkgdir}"/{boot,usr/lib/modules}
   make LOCALVERSION= INSTALL_MOD_PATH="${pkgdir}/usr" modules_install
 
   # systemd expects to find the kernel here to allow hibernation
   # https://github.com/systemd/systemd/commit/edda44605f06a41fb86b7ab8128dcf99161d2344
-  cp arch/$KARCH/boot/bzImage "${pkgdir}/usr/lib/modules/${_kernver}/vmlinuz"
+  cp arch/$KARCH/boot/bzImage "$modulesdir/vmlinuz"
 
   # Used by mkinitcpio to name the kernel
-  echo "${pkgbase}" | install -Dm644 /dev/stdin "${pkgdir}/usr/lib/modules/${_kernver}/pkgbase"
-  echo "${_basekernel}${_kernelname}-${CARCH}" | install -Dm644 /dev/stdin "${pkgdir}/usr/lib/modules/${_kernver}/kernelbase"
+  echo "${pkgbase}" | install -Dm644 /dev/stdin "$modulesdir/pkgbase"
+  echo "${kernelbase}-${CARCH}" | install -Dm644 /dev/stdin "$modulesdir/kernelbase"
 
   # add kernel version
   echo "${pkgver}-${pkgrel}${_kernelname} x64" > "${pkgdir}/boot/${pkgbase}-${CARCH}.kver"
 
   # make room for external modules
-  local _extramodules="extramodules-${_basekernel}${_kernelname:--vd}"
-  ln -s "../${_extramodules}" "${pkgdir}/usr/lib/modules/${_kernver}/extramodules"
+  local _extramodules="extramodules-${kernelbase}"
+  ln -s "../${_extramodules}" "$modulesdir/extramodules"
 
   # add real version for building modules and running depmod from hook
   echo "${_kernver}" |
     install -Dm644 /dev/stdin "${pkgdir}/usr/lib/modules/${_extramodules}/version"
 
   # remove build and source links
-  rm "${pkgdir}"/usr/lib/modules/${_kernver}/{source,build}
+  rm "$modulesdir/{source,build}"
 
   # now we call depmod...
-  depmod -b "${pkgdir}/usr" -F System.map "${_kernver}"
+  depmod -b "${pkgdir}/usr" -F System.map "$kernver"
 
   # add vmlinux
-  install -Dt "${pkgdir}/usr/lib/modules/${_kernver}/build" -m644 vmlinux
+  install -Dt "$modulesdir/build" -m644 vmlinux
 }
 
 package_linux54-vd-headers() {
@@ -199,7 +213,7 @@ package_linux54-vd-headers() {
   cd "${srcdir}/linux-${pkgver}"
   local _builddir="${pkgdir}/usr/lib/modules/${_kernver}/build"
 
-  install -Dt "${_builddir}" -m644 Makefile .config Module.symvers
+  install -Dt "${_builddir}" -m644 Makefile .config Module.symvers System.map || exit 32
   install -Dt "${_builddir}/kernel" -m644 kernel/Makefile
 
   mkdir "${_builddir}/.tmp_versions"
@@ -210,11 +224,10 @@ package_linux54-vd-headers() {
   install -Dt "${_builddir}/arch/${KARCH}/kernel" -m644 "arch/${KARCH}/kernel/asm-offsets.s"
   #install -Dt "${_builddir}/arch/${KARCH}/kernel" -m644 "arch/${KARCH}/kernel/macros.s"
 
-  if [ "${CARCH}" = "i686" ]; then
-    install -Dt "${_builddir}/arch/${KARCH}" -m644 "arch/${KARCH}/Makefile_32.cpu"
-  fi
-
   cp -t "${_builddir}/arch/${KARCH}" -a "arch/${KARCH}/include"
+  
+  # add objtool for external module building and enabled VALIDATION_STACK option
+  install -Dt "${_builddir}/tools/objtool" tools/objtool/objtool
 
   install -Dt "${_builddir}/drivers/md" -m644 drivers/md/*.h
   install -Dt "${_builddir}/net/mac80211" -m644 net/mac80211/*.h
@@ -233,11 +246,6 @@ package_linux54-vd-headers() {
   # copy in Kconfig files
   find . -name Kconfig\* -exec install -Dm644 {} "${_builddir}/{}" \;
 
-  if [ "${CARCH}" = "x86_64" ]; then
-    # add objtool for external module building and enabled VALIDATION_STACK option
-    install -Dt "${_builddir}/tools/objtool" tools/objtool/objtool
-  fi
-
   # remove unneeded architectures
   local _arch
   for _arch in "${_builddir}"/arch/*/; do
@@ -247,19 +255,27 @@ package_linux54-vd-headers() {
 
   # remove files already in linux-docs package
   rm -r "${_builddir}/Documentation"
+  
+  msg2 "Removing broken symlinks..."
+  find -L "${_builddir}" -type l -printf 'Removing %P\n' -delete
+
+  msg2 "Removing loose objects..."
+  find "${_builddir}" -type f -name '*.o' -printf 'Removing %P\n' -delete
 
   # Fix permissions
   chmod -R u=rwX,go=rX "${_builddir}"
 
   # strip scripts directory
+  msg2 "Stripping build tools..."
   local _binary _strip
   while read -rd '' _binary; do
     case "$(file -bi "${_binary}")" in
       *application/x-sharedlib*)  _strip="${STRIP_SHARED}"   ;; # Libraries (.so)
       *application/x-archive*)    _strip="${STRIP_STATIC}"   ;; # Libraries (.a)
       *application/x-executable*) _strip="${STRIP_BINARIES}" ;; # Binaries
+      *application/x-pie-executable*) _strip="${STRIP_SHARED}" ;; # Relocatable binaries
       *) continue ;;
     esac
-    /usr/bin/strip ${_strip} "${_binary}"
+    /usr/bin/strip -v ${_strip} "${_binary}"
   done < <(find "${_builddir}/scripts" -type f -perm -u+w -print0 2>/dev/null)
 }
