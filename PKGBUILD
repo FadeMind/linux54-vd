@@ -22,7 +22,7 @@ makedepends=('xmlto' 'docbook-xsl' 'kmod' 'inetutils' 'bc' 'elfutils' 'git')
 options=('!strip')
 source=(https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-${pkgver}.tar.{xz,sign}
         # the main kernel config files
-        'config.x86_64' 'config.vd' 'config.x200' 'x509.genkey'
+        'config.x86_64' 'config.vd' 'config.x200' 'x509.genkey' "${pkgbase}.preset"
         # ARCH Patches
         0001-ZEN-Add-sysctl-and-CONFIG-to-disallow-unprivileged-CLONE_NEWUSER.patch
         # MANJARO Patches
@@ -55,6 +55,7 @@ sha256sums=('32f98256877ca6b016715ffffcf184f1603df9e17a324787f252cd602e03a557'
             '4b846e63c3b8333011fa9ed06f7ae80666036d027dd48d94ae24141ec428c30a'
             'e65a0a83f83c92075d04fe7c14c380915134d828c3708b7d60cc2a61f5c55f0e'
             'ab010dc5ef6ce85d352956e5996d242246ecd0912b30f0b72025c38eadff8cd5'
+            'c14f60f37c5ef16d104aaa05fdc470f8d6d341181f5370b92918c283728e5625'
             '7685d526bbdbfa795986591a70071c960ff572f56d3501774861728a9df8664c'
             '7a2758f86dd1339f0f1801de2dbea059b55bf3648e240878b11e6d6890d3089c'
             '1fd4518cb0518d68f8db879f16ce16455fdc2200ed232f9e27fb5f1f3b5e4906'
@@ -211,6 +212,9 @@ package_linux54-vd() {
 
   # add vmlinux
   install -Dt "$modulesdir/build" -m644 vmlinux
+
+  # add mkinitcpio preset (not strictly needed)
+  install -Dm644 "$srcdir/${pkgbase}.preset" "$pkgdir/etc/mkinitcpio.d/${pkgbase}.preset"
 }
 
 package_linux54-vd-headers() {

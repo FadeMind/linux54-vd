@@ -57,7 +57,7 @@ package_linux54-vd-virtualbox-host-modules(){
   for i in vbox{drv,pci,netflt,netadp}.ko; do
   	sign-file54.sh "${pkgdir}/usr/lib/modules/${_extramodules}/$i"
   done
-  find "$pkgdir" -name '*.ko' -exec gzip -9 {} +
+  find "$pkgdir" -name '*.ko' -exec gzip -4 {} +
   sed -i -e "s/EXTRAMODULES='.*'/EXTRAMODULES='$_extramodules'/" "$startdir/virtualbox-host-modules.install"
 
   mkdir -p "$pkgdir/etc/modules-load.d"
