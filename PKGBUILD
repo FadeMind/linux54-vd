@@ -14,7 +14,7 @@ _kernelname=-vd
 _sub=2
 kernelbase=${_basekernel}${_kernelname}
 pkgver=${_basekernel}.${_sub}
-pkgrel=1
+pkgrel=2
 arch=('x86_64')
 url="http://www.kernel.org/"
 license=('GPL2')
@@ -199,7 +199,7 @@ package_linux54-vd() {
   ln -s "../${_extramodules}" "$modulesdir/extramodules"
 
   # add real version for building modules and running depmod from hook
-  echo "${_kernver}" |
+  echo "${kernver}" |
     install -Dm644 /dev/stdin "${pkgdir}/usr/lib/modules/${_extramodules}/version"
 
   # remove build and source links
@@ -218,7 +218,7 @@ package_linux54-vd-headers() {
   provides=("linux-headers=$pkgver")
 
   cd "${srcdir}/linux-${pkgver}"
-  local _builddir="${pkgdir}/usr/lib/modules/${_kernver}/build"
+  local _builddir="${pkgdir}/usr/lib/modules/${kernver}/build"
 
   install -Dt "${_builddir}" -m644 Makefile .config Module.symvers System.map || exit 32
   install -Dt "${_builddir}/kernel" -m644 kernel/Makefile
