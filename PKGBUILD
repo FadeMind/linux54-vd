@@ -14,7 +14,7 @@ _kernelname=-vd
 _sub=2
 kernelbase=${_basekernel}${_kernelname}
 pkgver=${_basekernel}.${_sub}
-pkgrel=2
+pkgrel=3
 arch=('x86_64')
 url="http://www.kernel.org/"
 license=('GPL2')
@@ -52,7 +52,7 @@ validpgpkeys=(
 sha256sums=('32f98256877ca6b016715ffffcf184f1603df9e17a324787f252cd602e03a557'
             'SKIP'
             '1f2a113cf9df4dc1df2e7b5dbe307e52b92f35572ead855492ff33dd0ee09acb'
-            '4b846e63c3b8333011fa9ed06f7ae80666036d027dd48d94ae24141ec428c30a'
+            'd6946b1a88b207cf5d1ea0d86fd22a8b854d64dc189d4c6e0d107e3d61a3f7e1'
             'e65a0a83f83c92075d04fe7c14c380915134d828c3708b7d60cc2a61f5c55f0e'
             'ab010dc5ef6ce85d352956e5996d242246ecd0912b30f0b72025c38eadff8cd5'
             'c14f60f37c5ef16d104aaa05fdc470f8d6d341181f5370b92918c283728e5625'
@@ -222,6 +222,7 @@ package_linux54-vd-headers() {
   provides=("linux-headers=$pkgver")
 
   cd "${srcdir}/linux-${pkgver}"
+  local kernver="$(<version)"
   local _builddir="${pkgdir}/usr/lib/modules/${kernver}/build"
 
   install -Dt "${_builddir}" -m644 Makefile .config Module.symvers System.map || exit 32
