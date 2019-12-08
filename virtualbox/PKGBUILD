@@ -11,7 +11,7 @@ _linuxprefix=linux54-vd
 _extramodules=extramodules-5.4-vd
 pkgbase=$_linuxprefix-virtualbox-modules
 pkgname=("$_linuxprefix-virtualbox-host-modules")
-	#"$_linuxprefix-virtualbox-guest-modules")
+	#"$_linuxprefix-virtualbox-guest-modules"
 pkgver=6.0.14
 _pkgver="${pkgver}_OSE"
 pkgrel=2
@@ -36,9 +36,9 @@ build() {
   # build host modules
   msg2 'Host modules'
   dkms --dkmsframework dkms.conf build "vboxhost/$_pkgver" -k "$_kernver"
-  # build guest modules  
-  msg2 'Guest modules'
-  dkms --dkmsframework dkms.conf build "vboxsf/$_pkgver" -k "$_kernver"
+  # build guest modules
+  #msg2 'Guest modules'
+  #dkms --dkmsframework dkms.conf build "vboxsf/$_pkgver" -k "$_kernver"
 }
 
 package_linux54-vd-virtualbox-host-modules(){
@@ -52,7 +52,7 @@ package_linux54-vd-virtualbox-host-modules(){
 
   install -dm755 "$pkgdir/usr/lib/modules/$_extramodules"
   cd "dkms/vboxhost/$_pkgver/$_kernver/$CARCH/module"
-  gunzip *.ko.gz
+  unxz *.ko.xz
   install -m644 * "$pkgdir/usr/lib/modules/$_extramodules"
   echo -e "Signing modules with kernel key...\n"
   for i in vbox{drv,pci,netflt,netadp}.ko; do
