@@ -11,10 +11,10 @@ pkgbase=linux54-vd
 pkgname=('linux54-vd' 'linux54-vd-headers')
 _basekernel=5.4
 _kernelname=-vd
-_sub=2
+_sub=3
 kernelbase=${_basekernel}${_kernelname}
 pkgver=${_basekernel}.${_sub}
-pkgrel=3
+pkgrel=2
 arch=('x86_64')
 url="http://www.kernel.org/"
 license=('GPL2')
@@ -44,15 +44,19 @@ source=(https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-${pkgver}.tar.{xz,sig
 	0003-optimise-module-compression.patch
 	block-optimisations-hho.patch
 	# amdgpu backports
+	0001-amd-sriov-vf-does-not-support-baco.patch
+	0002-amd-fix-gfx-vf-flr-fail-on-navi.patch
+	0003-amd-explicitly-wait-for-cp-idle.patch
+	0004-amd-reinit-clear-state-buffer-after-reset.patch
 )
 validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
   '647F28654894E3BD457199BE38DBBDC86092693E'  # Greg Kroah-Hartman
 )
-sha256sums=('32f98256877ca6b016715ffffcf184f1603df9e17a324787f252cd602e03a557'
+sha256sums=('6731682f32e1b1ee53b0e7f66b8dc263d25a0e809e78e2139cb0ed77c378ee51'
             'SKIP'
             '1f2a113cf9df4dc1df2e7b5dbe307e52b92f35572ead855492ff33dd0ee09acb'
-            'd6946b1a88b207cf5d1ea0d86fd22a8b854d64dc189d4c6e0d107e3d61a3f7e1'
+            'b7ef90ef70e5fdf1265b32f00cc49dc191eb3e2c8f3c9e04c7d7abcf15ba6e79'
             'e65a0a83f83c92075d04fe7c14c380915134d828c3708b7d60cc2a61f5c55f0e'
             'ab010dc5ef6ce85d352956e5996d242246ecd0912b30f0b72025c38eadff8cd5'
             'c14f60f37c5ef16d104aaa05fdc470f8d6d341181f5370b92918c283728e5625'
@@ -68,9 +72,13 @@ sha256sums=('32f98256877ca6b016715ffffcf184f1603df9e17a324787f252cd602e03a557'
             '6cf992514973b94cffe81b5547a8c76c0ccd03f7bafc1a234c5af4ba34cc1a9d'
             'c6944879f5cdfd335a3adc75b6f6194d127ad93d4dd5bf90d2ad505e83c9b6d2'
             'f4041dc77564ee6de09c1c02c59068b8eceb6fbdbe60158acdec0a0cfb5cb3f7'
-            'f4f42dd737f2398a27d674cb7cb666f299b15542f05f35dcd4b8e1835a845c10'
+            '949360a832de6c4951433607444c55369703f8a030455609729d7cf11aca7efc'
             '0d6fbf9a5206529d6791d41767ec254f0040d053713092b5fbb21fbe7f3604b7'
-            '74eb904dea0162eace78cbf6ab68bb3d151522c84efc3c55ba0c23a21db126c2')
+            '74eb904dea0162eace78cbf6ab68bb3d151522c84efc3c55ba0c23a21db126c2'
+            'c449d684f27a44c2368622b6f76abb960c03281218d4512969c567371a74afe0'
+            '1801216e75c7fc6569be04bc134d8233b6cbaa02f96d5eb58f18429bef724683'
+            'fcf767648859ef8ff6a90b598207548ad81a8bf68be75c402ef50a1afb10c3ed'
+            'ebb35c21509e4acddff0f912c85bda501ab4eefd2f0bb976c28e4301bf27eda3')
 
 export KBUILD_BUILD_USER=systemd-run
 export KBUILD_BUILD_HOST=manjaro
@@ -98,6 +106,10 @@ prepare() {
   patch -Np1 -i ../0001-nonupstream-navi10-vfio-reset.patch
 
   # amdgpu backports
+  patch -Np1 -i ../0001-amd-sriov-vf-does-not-support-baco.patch
+  patch -Np1 -i ../0002-amd-fix-gfx-vf-flr-fail-on-navi.patch
+  patch -Np1 -i ../0003-amd-explicitly-wait-for-cp-idle.patch
+  patch -Np1 -i ../0004-amd-reinit-clear-state-buffer-after-reset.patch
 
   # BMQ scheduler
   #patch -Np1 -i ../bmq-5.4.y-20191125.patch

@@ -12,9 +12,9 @@ _extramodules=extramodules-5.4-vd
 pkgbase=$_linuxprefix-virtualbox-modules
 pkgname=("$_linuxprefix-virtualbox-host-modules")
 	#"$_linuxprefix-virtualbox-guest-modules"
-pkgver=6.0.14
+pkgver=6.1.0
 _pkgver="${pkgver}_OSE"
-pkgrel=2
+pkgrel=1
 arch=('x86_64')
 url='http://virtualbox.org'
 license=('GPL')
@@ -55,17 +55,16 @@ package_linux54-vd-virtualbox-host-modules(){
   unxz *.ko.xz
   install -m644 * "$pkgdir/usr/lib/modules/$_extramodules"
   echo -e "Signing modules with kernel key...\n"
-  for i in vbox{drv,pci,netflt,netadp}.ko; do
-  	sign-file54.sh "${pkgdir}/usr/lib/modules/${_extramodules}/$i"
+  for i in vbox{drv,netflt,netadp}.ko; do
+  	/home/archon/bin/sign-file54.sh "${pkgdir}/usr/lib/modules/${_extramodules}/$i"
   done
-  find "$pkgdir" -name '*.ko' -exec gzip -4 {} +
+  find "$pkgdir" -name '*.ko' -exec xz -T2 --lzma2=dict=2M {} +
   sed -i -e "s/EXTRAMODULES='.*'/EXTRAMODULES='$_extramodules'/" "$startdir/virtualbox-host-modules.install"
 
   mkdir -p "$pkgdir/etc/modules-load.d"
   echo "vboxdrv" > "$pkgdir/etc/modules-load.d/$_linuxprefix-virtualbox-host-modules.conf"
   echo "vboxnetadp" >> "$pkgdir/etc/modules-load.d/$_linuxprefix-virtualbox-host-modules.conf"
   echo "vboxnetflt" >> "$pkgdir/etc/modules-load.d/$_linuxprefix-virtualbox-host-modules.conf"
-  echo "vboxpci" >> "$pkgdir/etc/modules-load.d/$_linuxprefix-virtualbox-host-modules.conf"
 }
 
 #package_linux54-vd-virtualbox-guest-modules(){

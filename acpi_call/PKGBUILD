@@ -12,7 +12,7 @@ _extramodules=extramodules-5.4-vd
 pkgname=$_linuxprefix-acpi_call
 _pkgname=acpi_call
 pkgver=1.1.0
-pkgrel=2
+pkgrel=3
 pkgdesc='A linux kernel module that enables calls to ACPI methods through /proc/acpi/call'
 arch=('x86_64')
 url="http://github.com/mkottman/acpi_call"
@@ -45,7 +45,7 @@ package() {
   install -m 644 acpi_call.ko "${pkgdir}"/usr/lib/modules/${_extramodules}/
   echo -e "Signing modules with kernel key...\n"
   sign-file54.sh "${pkgdir}/usr/lib/modules/${_extramodules}/acpi_call.ko"
-  gzip -4 "${pkgdir}"/usr/lib/modules/${_extramodules}/acpi_call.ko
+  xz -T2 --lzma2=dict=2M "${pkgdir}"/usr/lib/modules/${_extramodules}/acpi_call.ko
   echo acpi_call > "${pkgdir}"/usr/lib/modules-load.d/${pkgname}.conf
 
   install -dm 755 "${pkgdir}"/usr/share/${pkgname}
