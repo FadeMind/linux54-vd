@@ -14,7 +14,7 @@ _kernelname=-vd
 _sub=3
 kernelbase=${_basekernel}${_kernelname}
 pkgver=${_basekernel}.${_sub}
-pkgrel=2
+pkgrel=3
 arch=('x86_64')
 url="http://www.kernel.org/"
 license=('GPL2')
@@ -22,9 +22,9 @@ makedepends=('xmlto' 'docbook-xsl' 'kmod' 'inetutils' 'bc' 'elfutils' 'git')
 options=('!strip')
 source=(https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-${pkgver}.tar.{xz,sign}
         # the main kernel config files
-        'config.x86_64' 'config.vd' 'config.x200' 'x509.genkey' "${pkgbase}.preset"
+        'config.x86_64' 'config.vd' 'config.x200' 'config.x270' 'config.x570' 'x509.genkey' "${pkgbase}.preset"
         # ARCH Patches
-        0001-ZEN-Add-sysctl-and-CONFIG-to-disallow-unprivileged-CLONE_NEWUSER.patch
+        0001-arch-patches-20191213.patch::https://raw.githubusercontent.com/sirlucjan/kernel-patches/master/5.4/arch-patches-v3/0001-arch-patches.patch
         # MANJARO Patches
         '0001-nonupstream-navi10-vfio-reset.patch'
         '0001-drm-amdgpu-Add-DC-feature-mask-to-disable-fractional-pwm.patch'
@@ -58,9 +58,11 @@ sha256sums=('6731682f32e1b1ee53b0e7f66b8dc263d25a0e809e78e2139cb0ed77c378ee51'
             '1f2a113cf9df4dc1df2e7b5dbe307e52b92f35572ead855492ff33dd0ee09acb'
             'b7ef90ef70e5fdf1265b32f00cc49dc191eb3e2c8f3c9e04c7d7abcf15ba6e79'
             'e65a0a83f83c92075d04fe7c14c380915134d828c3708b7d60cc2a61f5c55f0e'
+            'd1a58b6f102d5f0a04a2553be0302c0bf9cdc4d00b9d08225d633e90210c6c40'
+            '3d631decf8131bcdfebcd2498d7e7f4ddca9a72f9e97122583dbce3988102a20'
             'ab010dc5ef6ce85d352956e5996d242246ecd0912b30f0b72025c38eadff8cd5'
             'c14f60f37c5ef16d104aaa05fdc470f8d6d341181f5370b92918c283728e5625'
-            '7685d526bbdbfa795986591a70071c960ff572f56d3501774861728a9df8664c'
+            '4dc2f6c34cc3272570b1e576cbf8751fa13339b49d73df18158cf481815a3897'
             '7a2758f86dd1339f0f1801de2dbea059b55bf3648e240878b11e6d6890d3089c'
             '1fd4518cb0518d68f8db879f16ce16455fdc2200ed232f9e27fb5f1f3b5e4906'
             'fd1f34cf87e72ccd6070590028ad34e12dc42285637a0c61894680cb81d4fb88'
@@ -93,11 +95,11 @@ prepare() {
 
   msg2 "APPLYING PATCHES"
 
-  # disable USER_NS for non-root users by default
-  patch -Np1 -i ../0001-ZEN-Add-sysctl-and-CONFIG-to-disallow-unprivileged-CLONE_NEWUSER.patch
+  # Arch patches
+  patch -Np1 -i ../0001-arch-patches-20191213.patch
 
   # https://bugzilla.kernel.org/show_bug.cgi?id=204957
-  #patch -Np1 -i ../0001-drm-amdgpu-Add-DC-feature-mask-to-disable-fractional-pwm.patch
+  patch -Np1 -i ../0001-drm-amdgpu-Add-DC-feature-mask-to-disable-fractional-pwm.patch
 
   # TODO: remove when AMD properly fixes it!
   # INFO: this is a hack and won't be upstreamed
@@ -198,7 +200,7 @@ package_linux54-vd() {
 
   # systemd expects to find the kernel here to allow hibernation
   # https://github.com/systemd/systemd/commit/edda44605f06a41fb86b7ab8128dcf99161d2344
-  cp arch/$KARCH/boot/bzImage "$modulesdir/vmlinuz"
+  install -Dm644 "$(make -s image_name)" "$modulesdir/vmlinuz"
 
   # Used by mkinitcpio to name the kernel
   echo "${pkgbase}" | install -Dm644 /dev/stdin "$modulesdir/pkgbase"
@@ -215,15 +217,18 @@ package_linux54-vd() {
   echo "${kernver}" |
     install -Dm644 /dev/stdin "${pkgdir}/usr/lib/modules/${_extramodules}/version"
 
+  # now we call depmod...
+  depmod -b "${pkgdir}/usr" -F System.map "$kernver"
+
   # remove build and source links
   rm $modulesdir/source
   rm $modulesdir/build
 
-  # now we call depmod...
-  depmod -b "${pkgdir}/usr" -F System.map "$kernver"
+  # Fixing permissions
+  chmod -Rc u=rwX,go=rX "$pkgdir"
 
   # add vmlinux
-  install -Dt "$modulesdir/build" -m644 vmlinux
+  #install -Dt "$modulesdir/build" -m644 vmlinux
 
   # add mkinitcpio preset (not strictly needed)
   install -Dm644 "$srcdir/${pkgbase}.preset" "$pkgdir/etc/mkinitcpio.d/${pkgbase}.preset"
@@ -286,20 +291,23 @@ package_linux54-vd-headers() {
   msg2 "Removing loose objects..."
   find "${_builddir}" -type f -name '*.o' -printf 'Removing %P\n' -delete
 
-  # Fix permissions
-  chmod -R u=rwX,go=rX "${_builddir}"
-
   # strip scripts directory
   msg2 "Stripping build tools..."
-  local _binary _strip
-  while read -rd '' _binary; do
-    case "$(file -bi "${_binary}")" in
-      *application/x-sharedlib*)  _strip="${STRIP_SHARED}"   ;; # Libraries (.so)
-      *application/x-archive*)    _strip="${STRIP_STATIC}"   ;; # Libraries (.a)
-      *application/x-executable*) _strip="${STRIP_BINARIES}" ;; # Binaries
-      *application/x-pie-executable*) _strip="${STRIP_SHARED}" ;; # Relocatable binaries
-      *) continue ;;
+  local file
+  while read -rd '' file; do
+    case "$(file -bi "$file")" in
+      application/x-sharedlib\;*)      # Libraries (.so)
+        strip -v $STRIP_SHARED "$file" ;;
+      application/x-archive\;*)        # Libraries (.a)
+        strip -v $STRIP_STATIC "$file" ;;
+      application/x-executable\;*)     # Binaries
+        strip -v $STRIP_BINARIES "$file" ;;
+      application/x-pie-executable\;*) # Relocatable binaries
+        strip -v $STRIP_SHARED "$file" ;;
     esac
-    /usr/bin/strip -v ${_strip} "${_binary}"
-  done < <(find "${_builddir}/scripts" -type f -perm -u+w -print0 2>/dev/null)
+  done < <(find "${_builddir}" -type f -perm -u+w -print0 2>/dev/null)
+
+  # Fix permissions
+  chmod -R u=rwX,go=rX "${_builddir}"
 }
+
