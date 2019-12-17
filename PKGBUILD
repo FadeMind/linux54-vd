@@ -55,7 +55,7 @@ validpgpkeys=(
 )
 sha256sums=('6731682f32e1b1ee53b0e7f66b8dc263d25a0e809e78e2139cb0ed77c378ee51'
             'SKIP'
-            '1f2a113cf9df4dc1df2e7b5dbe307e52b92f35572ead855492ff33dd0ee09acb'
+            '02d7e00581c4592841ac121f451f39eaf901052ea44177d8c18eba5d994c3a80'
             'b7ef90ef70e5fdf1265b32f00cc49dc191eb3e2c8f3c9e04c7d7abcf15ba6e79'
             'e65a0a83f83c92075d04fe7c14c380915134d828c3708b7d60cc2a61f5c55f0e'
             'd1a58b6f102d5f0a04a2553be0302c0bf9cdc4d00b9d08225d633e90210c6c40'
@@ -131,9 +131,30 @@ prepare() {
   patch -Np1 -i ../0003-optimise-module-compression.patch
 
   cat ../x509.genkey > ./certs/x509.genkey
-  cat ../config.vd > ./.config
+
+  local _config
+  echo -e "\n"
+  msg2 "KERNEL CONFIGURATION"
+  echo "---- Select configuration file:"
+  echo "1) Manjaro default"
+  echo "2) vd default"
+  echo "3) x570"
+  echo "4) x270"
+  echo "5) x200"
+  while [[ ${_config} != ^[1-5] ]] ; do
+  	read -p "Enter number (1-5): " _config
+	  case ${_config} in
+		1) cat ../config.x86_64 > ./.config && break ;;
+		2) cat ../config.vd > ./.config && break ;;
+		3) cat ../config.x570 > ./.config && break ;;
+		4) cat ../config.x270 > ./.config && break ;;
+		5) cat ../config.x200 > ./.config && break ;;
+		*) echo "Please enter a number (1-5)!" && continue ;;
+  	  esac
+  done
 
   # add key
+  echo -e "\n"
   msg2 "KERNEL KEY GENERATION"
   read -p "---- Enter the full path to the key if you have one, else enter 'n': " UCHOICE
   if [[ ${UCHOICE} != "n" ]]; then
@@ -225,6 +246,7 @@ package_linux54-vd() {
   rm $modulesdir/build
 
   # Fixing permissions
+  msg2 "Fixing permissions..."
   chmod -Rc u=rwX,go=rX "$pkgdir"
 
   # add vmlinux
@@ -308,6 +330,7 @@ package_linux54-vd-headers() {
   done < <(find "${_builddir}" -type f -perm -u+w -print0 2>/dev/null)
 
   # Fix permissions
+  msg2 "Fixing permissions..."
   chmod -R u=rwX,go=rX "${_builddir}"
 }
 
