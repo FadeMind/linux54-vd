@@ -11,10 +11,10 @@ pkgbase=linux54-vd
 pkgname=('linux54-vd' 'linux54-vd-headers')
 _basekernel=5.4
 _kernelname=-vd
-_sub=3
+_sub=4
 kernelbase=${_basekernel}${_kernelname}
 pkgver=${_basekernel}.${_sub}
-pkgrel=3
+pkgrel=1
 arch=('x86_64')
 url="http://www.kernel.org/"
 license=('GPL2')
@@ -24,7 +24,7 @@ source=(https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-${pkgver}.tar.{xz,sig
         # the main kernel config files
         'config.x86_64' 'config.vd' 'config.x200' 'config.x270' 'config.x570' 'x509.genkey' "${pkgbase}.preset"
         # ARCH Patches
-        0001-arch-patches-20191213.patch::https://raw.githubusercontent.com/sirlucjan/kernel-patches/master/5.4/arch-patches-v3/0001-arch-patches.patch
+        0001-arch-patches-20191217.patch::https://raw.githubusercontent.com/sirlucjan/kernel-patches/master/5.4/arch-patches-v4/0001-arch-patches.patch
         # MANJARO Patches
         '0001-nonupstream-navi10-vfio-reset.patch'
         '0001-drm-amdgpu-Add-DC-feature-mask-to-disable-fractional-pwm.patch'
@@ -53,7 +53,7 @@ validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
   '647F28654894E3BD457199BE38DBBDC86092693E'  # Greg Kroah-Hartman
 )
-sha256sums=('6731682f32e1b1ee53b0e7f66b8dc263d25a0e809e78e2139cb0ed77c378ee51'
+sha256sums=('3fa2aad785f8031246b25362d7542dac46aaaa91546fb41b6419fb759e43e6c2'
             'SKIP'
             '02d7e00581c4592841ac121f451f39eaf901052ea44177d8c18eba5d994c3a80'
             'b7ef90ef70e5fdf1265b32f00cc49dc191eb3e2c8f3c9e04c7d7abcf15ba6e79'
@@ -62,7 +62,7 @@ sha256sums=('6731682f32e1b1ee53b0e7f66b8dc263d25a0e809e78e2139cb0ed77c378ee51'
             '3d631decf8131bcdfebcd2498d7e7f4ddca9a72f9e97122583dbce3988102a20'
             'ab010dc5ef6ce85d352956e5996d242246ecd0912b30f0b72025c38eadff8cd5'
             'c14f60f37c5ef16d104aaa05fdc470f8d6d341181f5370b92918c283728e5625'
-            '4dc2f6c34cc3272570b1e576cbf8751fa13339b49d73df18158cf481815a3897'
+            'd3e2903a05d42412bbe7eb1c082208cc47f900e0f5aa9c9c3a470bd13c167a45'
             '7a2758f86dd1339f0f1801de2dbea059b55bf3648e240878b11e6d6890d3089c'
             '1fd4518cb0518d68f8db879f16ce16455fdc2200ed232f9e27fb5f1f3b5e4906'
             'fd1f34cf87e72ccd6070590028ad34e12dc42285637a0c61894680cb81d4fb88'
@@ -96,7 +96,7 @@ prepare() {
   msg2 "APPLYING PATCHES"
 
   # Arch patches
-  patch -Np1 -i ../0001-arch-patches-20191213.patch
+  patch -Np1 -i ../0001-arch-patches-20191217.patch
 
   # https://bugzilla.kernel.org/show_bug.cgi?id=204957
   patch -Np1 -i ../0001-drm-amdgpu-Add-DC-feature-mask-to-disable-fractional-pwm.patch
