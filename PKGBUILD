@@ -5,7 +5,7 @@
 # Maintainer: Philip Müller (x86_64) <philm@manjaro.org>
 # Maintainer: Jonathon Fernyhough (i686) <jonathon@manjaro.org>
 # Contributor: Helmut Stult <helmut[at]manjaro[dot]org>
-# torvic9
+# Maintainer (vd): torvic9
 
 pkgbase=linux54-vd
 pkgname=('linux54-vd' 'linux54-vd-headers')
@@ -14,7 +14,7 @@ _kernelname=-vd
 _sub=4
 kernelbase=${_basekernel}${_kernelname}
 pkgver=${_basekernel}.${_sub}
-pkgrel=1
+pkgrel=2
 arch=('x86_64')
 url="http://www.kernel.org/"
 license=('GPL2')
@@ -23,36 +23,50 @@ options=('!strip')
 source=(https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-${pkgver}.tar.{xz,sign}
         # the main kernel config files
         'config.x86_64' 'config.vd' 'config.x200' 'config.x270' 'config.x570' 'x509.genkey' "${pkgbase}.preset"
+	#
         # ARCH Patches
         0001-arch-patches-20191217.patch::https://raw.githubusercontent.com/sirlucjan/kernel-patches/master/5.4/arch-patches-v4/0001-arch-patches.patch
+	#
         # MANJARO Patches
-        '0001-nonupstream-navi10-vfio-reset.patch'
-        '0001-drm-amdgpu-Add-DC-feature-mask-to-disable-fractional-pwm.patch'
-	# BMQ scheduler
-	#bmq-5.4.y-20191125.patch::https://gitlab.com/alfredchen/bmq/raw/master/5.4/bmq_v5.4-r0.patch
-        # vd
-	0001-futex.patch::https://raw.githubusercontent.com/sirlucjan/kernel-patches/master/5.4/futex-patches-sep/0001-futex-Split-key-setup-from-key-queue-locking-and-rea.patch
-	0002-futex.patch::https://raw.githubusercontent.com/sirlucjan/kernel-patches/master/5.4/futex-patches-sep/0002-futex-Implement-mechanism-to-wait-on-any-of-several-.patch
-	0003-futex.patch::https://raw.githubusercontent.com/sirlucjan/kernel-patches/master/5.4/futex-patches-sep/0003-futex-Change-WAIT_MULTIPLE-opcode-to-31.patch
-	cpu-optimisations-graysky.patch
-	0001-clearlinux-tweak-cpuidle.patch::https://raw.githubusercontent.com/clearlinux-pkgs/linux/master/0106-intel_idle-tweak-cpuidle-cstates.patch
-	0002-clearlinux-add-config-raid6.patch::https://raw.githubusercontent.com/clearlinux-pkgs/linux/master/0109-raid6-add-Kconfig-option-to-skip-raid6-benchmarking.patch
+        0001-amdgpu-Add-DC-feature-mask-to-disable-fractional-pwm.patch
+        0002-amdgpu-nonupstream-navi10-vfio-reset.patch
+	#
+	# amdgpu backports
+	0001-amdgpu-sriov-vf-does-not-support-baco.patch
+	0002-amdgpu-fix-gfx-vf-flr-fail-on-navi.patch
+	0003-amdgpu-explicitly-wait-for-cp-idle.patch
+	0004-amdgpu-reinit-clear-state-buffer-after-reset.patch
+	#
+	# bmq scheduler
+	#bmq-5.4-20191125.patch::https://gitlab.com/alfredchen/bmq/raw/master/5.4/bmq_v5.4-r0.patch
+	#
+        # sirlucjan
+	0001-futex-steam-fsync.patch::https://raw.githubusercontent.com/sirlucjan/kernel-patches/master/5.4/futex-patches-sep/0001-futex-Split-key-setup-from-key-queue-locking-and-rea.patch
+	0002-futex-steam-fsync.patch::https://raw.githubusercontent.com/sirlucjan/kernel-patches/master/5.4/futex-patches-sep/0002-futex-Implement-mechanism-to-wait-on-any-of-several-.patch
+	0003-futex-steam-fsync.patch::https://raw.githubusercontent.com/sirlucjan/kernel-patches/master/5.4/futex-patches-sep/0003-futex-Change-WAIT_MULTIPLE-opcode-to-31.patch
+	0001-clearlinux-tweak-intel-cpuidle.patch::https://raw.githubusercontent.com/clearlinux-pkgs/linux/master/0106-intel_idle-tweak-cpuidle-cstates.patch
+	0002-clearlinux-add-config-opt-for-raid6-bench.patch::https://raw.githubusercontent.com/clearlinux-pkgs/linux/master/0109-raid6-add-Kconfig-option-to-skip-raid6-benchmarking.patch
 	0003-clearlinux-init-ata-before-graphics.patch::https://raw.githubusercontent.com/clearlinux-pkgs/linux/master/0110-Initialize-ata-before-graphics.patch
-	add-nvme-hwmon-temp.patch
+	#
+	# vd
 	0001-tune-vm-and-vfs-settings.patch
 	0002-tune-cfs-scheduler.patch
 	0003-optimise-module-compression.patch
-	block-optimisations-hho.patch
-	# amdgpu backports
-	0001-amd-sriov-vf-does-not-support-baco.patch
-	0002-amd-fix-gfx-vf-flr-fail-on-navi.patch
-	0003-amd-explicitly-wait-for-cp-idle.patch
-	0004-amd-reinit-clear-state-buffer-after-reset.patch
+	0004-add-nvme-hwmon-temp.patch
+	0005-cpu-optimisations-graysky.patch
+	#
+	# hho
+	0001-enable-O3-opt-for-all-arches.patch::https://raw.githubusercontent.com/hhoffstaette/kernel-patches/5.4/5.4/kconfig-20191211-enable-O3-for-all-arches.patch
+	0002-mm-split-vmalloc_sync_all.patch::https://raw.githubusercontent.com/hhoffstaette/kernel-patches/5.4/5.4/mm-20191009-split-vmalloc_sync_all.patch
+	0003-block-perf-optimisations.patch
+	0004-net-disable-tcp-ssthresh-cache.patch::https://raw.githubusercontent.com/hhoffstaette/kernel-patches/5.4/5.4/net-20191209-disable-TCP-ssthresh-metrics-cache-by-default.patch
 )
+
 validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
   '647F28654894E3BD457199BE38DBBDC86092693E'  # Greg Kroah-Hartman
 )
+
 sha256sums=('3fa2aad785f8031246b25362d7542dac46aaaa91546fb41b6419fb759e43e6c2'
             'SKIP'
             '02d7e00581c4592841ac121f451f39eaf901052ea44177d8c18eba5d994c3a80'
@@ -63,85 +77,67 @@ sha256sums=('3fa2aad785f8031246b25362d7542dac46aaaa91546fb41b6419fb759e43e6c2'
             'ab010dc5ef6ce85d352956e5996d242246ecd0912b30f0b72025c38eadff8cd5'
             'c14f60f37c5ef16d104aaa05fdc470f8d6d341181f5370b92918c283728e5625'
             'd3e2903a05d42412bbe7eb1c082208cc47f900e0f5aa9c9c3a470bd13c167a45'
-            '7a2758f86dd1339f0f1801de2dbea059b55bf3648e240878b11e6d6890d3089c'
             '1fd4518cb0518d68f8db879f16ce16455fdc2200ed232f9e27fb5f1f3b5e4906'
-            'fd1f34cf87e72ccd6070590028ad34e12dc42285637a0c61894680cb81d4fb88'
-            '9660f0d31bdc5718b7fde41015898f67dce86602886585848d6300dfce2542db'
-            'cd228e4b62cab5679c93cd0eda5d96d570f1b3ba84340eddd2d049f2a07eef9d'
-            '607097f22f202cd829f12acce7a401fb7f7af5678ffeda90c1fc7da71b895ad7'
-            '819e206f4ef8c50fbe5112ea8566c5193fee522c7f28396af28d1dfdc3546ae0'
-            '672343639203797b194025f864845dea8097d4650b7af19e1cacdd2bfe9013b0'
-            '6cf992514973b94cffe81b5547a8c76c0ccd03f7bafc1a234c5af4ba34cc1a9d'
-            'c6944879f5cdfd335a3adc75b6f6194d127ad93d4dd5bf90d2ad505e83c9b6d2'
-            'f4041dc77564ee6de09c1c02c59068b8eceb6fbdbe60158acdec0a0cfb5cb3f7'
-            '949360a832de6c4951433607444c55369703f8a030455609729d7cf11aca7efc'
-            '0d6fbf9a5206529d6791d41767ec254f0040d053713092b5fbb21fbe7f3604b7'
-            '74eb904dea0162eace78cbf6ab68bb3d151522c84efc3c55ba0c23a21db126c2'
+            '7a2758f86dd1339f0f1801de2dbea059b55bf3648e240878b11e6d6890d3089c'
             'c449d684f27a44c2368622b6f76abb960c03281218d4512969c567371a74afe0'
             '1801216e75c7fc6569be04bc134d8233b6cbaa02f96d5eb58f18429bef724683'
             'fcf767648859ef8ff6a90b598207548ad81a8bf68be75c402ef50a1afb10c3ed'
-            'ebb35c21509e4acddff0f912c85bda501ab4eefd2f0bb976c28e4301bf27eda3')
+            'ebb35c21509e4acddff0f912c85bda501ab4eefd2f0bb976c28e4301bf27eda3'
+            'fd1f34cf87e72ccd6070590028ad34e12dc42285637a0c61894680cb81d4fb88'
+            '9660f0d31bdc5718b7fde41015898f67dce86602886585848d6300dfce2542db'
+            'cd228e4b62cab5679c93cd0eda5d96d570f1b3ba84340eddd2d049f2a07eef9d'
+            '88b5597753b01f90f77b99580943263969902ffc084972f8843e0659fdd5eb8f'
+            '47d26eb8a2ec74b3684ab61837ecfcdad5cdc40722ca01a32684dfdd3775fafc'
+            '6cf992514973b94cffe81b5547a8c76c0ccd03f7bafc1a234c5af4ba34cc1a9d'
+            'f4041dc77564ee6de09c1c02c59068b8eceb6fbdbe60158acdec0a0cfb5cb3f7'
+            '949360a832de6c4951433607444c55369703f8a030455609729d7cf11aca7efc'
+            '0d6fbf9a5206529d6791d41767ec254f0040d053713092b5fbb21fbe7f3604b7'
+            'c6944879f5cdfd335a3adc75b6f6194d127ad93d4dd5bf90d2ad505e83c9b6d2'
+            '607097f22f202cd829f12acce7a401fb7f7af5678ffeda90c1fc7da71b895ad7'
+            '21eac56173eb18959bbf02c1687dc7fa2c5d1df063ec90e6507f0008ce88bbef'
+            '47844884e429ffc395f51610825271c2549d2ab28b52251407d5b4f8a21fe1d9'
+            'b37b2132e97357201e039872c595da18aade6a64743d35ec33ebfd4d4851c3f4'
+            '9c006e4845c22808c954ca2374a2a9dd927c192e4bdaf0d00c6abc559831106e')
 
 export KBUILD_BUILD_USER=systemd-run
 export KBUILD_BUILD_HOST=manjaro
 
 prepare() {
+  local TBOLD=$(tput bold)
+  local TNORMAL=$(tput sgr0)
   cd "${srcdir}/linux-${pkgver}"
 
   # add latest fixes from stable queue, if needed
   # http://git.kernel.org/?p=linux/kernel/git/stable/stable-queue.git
   # enable only if you have "gen-stable-queue-patch.sh" executed before
   #patch -Np1 -i "${srcdir}/prepatch-${_basekernel}`date +%Y%m%d`"
-
+  printf '\n'
   msg2 "APPLYING PATCHES"
 
-  # Arch patches
-  patch -Np1 -i ../0001-arch-patches-20191217.patch
-
-  # https://bugzilla.kernel.org/show_bug.cgi?id=204957
-  patch -Np1 -i ../0001-drm-amdgpu-Add-DC-feature-mask-to-disable-fractional-pwm.patch
-
-  # TODO: remove when AMD properly fixes it!
-  # INFO: this is a hack and won't be upstreamed
-  # https://forum.level1techs.com/t/145666/86
-  # https://forum.manjaro.org/t/107820/11
-  patch -Np1 -i ../0001-nonupstream-navi10-vfio-reset.patch
-
-  # amdgpu backports
-  patch -Np1 -i ../0001-amd-sriov-vf-does-not-support-baco.patch
-  patch -Np1 -i ../0002-amd-fix-gfx-vf-flr-fail-on-navi.patch
-  patch -Np1 -i ../0003-amd-explicitly-wait-for-cp-idle.patch
-  patch -Np1 -i ../0004-amd-reinit-clear-state-buffer-after-reset.patch
-
-  # BMQ scheduler
-  #patch -Np1 -i ../bmq-5.4.y-20191125.patch
-
-  # vd
-  patch -Np1 -i ../0001-futex.patch
-  patch -Np1 -i ../0002-futex.patch
-  patch -Np1 -i ../0003-futex.patch
-  patch -Np1 -i ../0001-clearlinux-tweak-cpuidle.patch
-  patch -Np1 -i ../0002-clearlinux-add-config-raid6.patch
-  patch -Np1 -i ../0003-clearlinux-init-ata-before-graphics.patch
-  patch -Np1 -i ../cpu-optimisations-graysky.patch
-  patch -Np1 -i ../add-nvme-hwmon-temp.patch
-  patch -Np1 -i ../block-optimisations-hho.patch
-  patch -Np1 -i ../0001-tune-vm-and-vfs-settings.patch
-  patch -Np1 -i ../0002-tune-cfs-scheduler.patch
-  patch -Np1 -i ../0003-optimise-module-compression.patch
+  # apply patch from the source array (should be a pacman feature)
+  local filename filename2
+    for filename in "${source[@]}"; do
+    	if [[ "$filename" =~ \.patch$ ]]; then
+		filename="${filename%%::*}"
+		filename2="${filename#*-}"
+        	echo -e "\n---- Applying patch ${TBOLD}${filename2%%.*}${TNORMAL}:"
+        	patch -Np1 -i "$srcdir/${filename}"
+        fi
+    done
 
   cat ../x509.genkey > ./certs/x509.genkey
 
-  local _config
-  echo -e "\n"
+  # kernel config
+  printf '\n'
   msg2 "KERNEL CONFIGURATION"
+  local _config
   echo "---- Select configuration file:"
-  echo "1) Manjaro default"
-  echo "2) vd default"
-  echo "3) x570"
-  echo "4) x270"
-  echo "5) x200"
-  while [[ ${_config} != ^[1-5] ]] ; do
+  echo "${TBOLD}1)${TNORMAL} Manjaro default"
+  echo "${TBOLD}2)${TNORMAL} vd default"
+  echo "${TBOLD}3)${TNORMAL} x570"
+  echo "${TBOLD}4)${TNORMAL} x270"
+  echo "${TBOLD}5)${TNORMAL} x200"
+  while true ; do
   	read -p "Enter number (1-5): " _config
 	  case ${_config} in
 		1) cat ../config.x86_64 > ./.config && break ;;
@@ -154,7 +150,7 @@ prepare() {
   done
 
   # add key
-  echo -e "\n"
+  printf '\n'
   msg2 "KERNEL KEY GENERATION"
   read -p "---- Enter the full path to the key if you have one, else enter 'n': " UCHOICE
   if [[ ${UCHOICE} != "n" ]]; then
@@ -183,8 +179,9 @@ prepare() {
 
   # get kernel version
   make prepare
-  
+
   make -s kernelrelease > version
+  printf '\n'
   msg2 "Prepared %s version %s" "$pkgbase" "$(<version)"
   read -p "---- Enter 'y' for nconfig: " NCONFIG
   if [[ $NCONFIG = "y" ]] ; then make nconfig ; fi
@@ -210,13 +207,12 @@ package_linux54-vd() {
 
   KARCH=x86
 
-  # get kernel version
-  #_kernver="$(make LOCALVERSION= kernelrelease)"
-
   local kernver="$(<version)"
   local modulesdir="$pkgdir/usr/lib/modules/$kernver"
 
   mkdir -p "${pkgdir}"/{boot,usr/lib/modules}
+  printf '\n'
+  msg2 "Installing modules..."
   make LOCALVERSION= INSTALL_MOD_PATH="${pkgdir}/usr" modules_install
 
   # systemd expects to find the kernel here to allow hibernation
@@ -239,13 +235,16 @@ package_linux54-vd() {
     install -Dm644 /dev/stdin "${pkgdir}/usr/lib/modules/${_extramodules}/version"
 
   # now we call depmod...
-  depmod -b "${pkgdir}/usr" -F System.map "$kernver"
+  printf '\n'
+  msg2 "Running depmod..."
+  depmod -v -b "${pkgdir}/usr" -F System.map "$kernver"
 
   # remove build and source links
   rm $modulesdir/source
   rm $modulesdir/build
 
   # Fixing permissions
+  printf '\n'
   msg2 "Fixing permissions..."
   chmod -Rc u=rwX,go=rX "$pkgdir"
 
@@ -264,6 +263,8 @@ package_linux54-vd-headers() {
   local kernver="$(<version)"
   local _builddir="${pkgdir}/usr/lib/modules/${kernver}/build"
 
+  printf '\n'
+  msg2 "Installing headers..."
   install -Dt "${_builddir}" -m644 Makefile .config Module.symvers System.map || exit 32
   install -Dt "${_builddir}/kernel" -m644 kernel/Makefile
 
@@ -276,7 +277,7 @@ package_linux54-vd-headers() {
   #install -Dt "${_builddir}/arch/${KARCH}/kernel" -m644 "arch/${KARCH}/kernel/macros.s"
 
   cp -t "${_builddir}/arch/${KARCH}" -a "arch/${KARCH}/include"
-  
+
   # add objtool for external module building and enabled VALIDATION_STACK option
   install -Dt "${_builddir}/tools/objtool" tools/objtool/objtool
 
@@ -297,6 +298,9 @@ package_linux54-vd-headers() {
   # copy in Kconfig files
   find . -name Kconfig\* -exec install -Dm644 {} "${_builddir}/{}" \;
 
+  # remove unneeded stuff
+  printf '\n'
+  msg2 "Removing unneeded files..."
   # remove unneeded architectures
   local _arch
   for _arch in "${_builddir}"/arch/*/; do
@@ -306,14 +310,15 @@ package_linux54-vd-headers() {
 
   # remove files already in linux-docs package
   rm -r "${_builddir}/Documentation"
-  
-  msg2 "Removing broken symlinks..."
+
+  # remove broken symlinks
   find -L "${_builddir}" -type l -printf 'Removing %P\n' -delete
 
-  msg2 "Removing loose objects..."
+  # remove loose objects"
   find "${_builddir}" -type f -name '*.o' -printf 'Removing %P\n' -delete
 
   # strip scripts directory
+  printf '\n'
   msg2 "Stripping build tools..."
   local file
   while read -rd '' file; do
@@ -330,6 +335,7 @@ package_linux54-vd-headers() {
   done < <(find "${_builddir}" -type f -perm -u+w -print0 2>/dev/null)
 
   # Fix permissions
+  printf '\n'
   msg2 "Fixing permissions..."
   chmod -R u=rwX,go=rX "${_builddir}"
 }
