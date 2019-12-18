@@ -7,7 +7,7 @@
 - Arch patches from SirLucjan's repo
 - Clear Linux patches
 - amdgpu patches
-- add NVMe sensor reading to hwmon (`sensors`)
+- add NVMe sensor reading to hwmon (`sensors`) by G. Röck
 - tuned VM settings
 - tuned CFS settings for lower latency
 - kernel module compression optimisations
@@ -16,4 +16,12 @@
 - several fixes to Manjaro's original PKGBUILD by bringing it more in line with Arch
 - apply patches by looping through an array instead of one-by-one
 - beautification of build process output in PKGBUILD
+
+#### Credits:
+- Holger Hoffstätte
+- SirLucjan (Piotr Gorski)
+- Günter Röck
+- Manjaro
+- Arch
+- StackOverflow
 
