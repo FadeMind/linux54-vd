@@ -10,7 +10,7 @@ _linuxprefix=linux54-vd
 _extramodules=extramodules-5.4-vd
 pkgname=$_linuxprefix-nvidia-440xx
 _pkgname=nvidia
-pkgver=440.36
+pkgver=440.44
 pkgrel=1
 pkgdesc="NVIDIA drivers for the vd kernel."
 arch=('x86_64')
@@ -27,8 +27,8 @@ options=(!strip)
 durl="http://us.download.nvidia.com/XFree86/Linux-x86"
 source_x86_64=("${durl}_64/${pkgver}/NVIDIA-Linux-x86_64-${pkgver}-no-compat32.run"
                 'buildflags-O3.patch')
-sha256sums_x86_64=('1d25b67e70e59db0d0604a1ddbffbd3fe42cd6bd8184630b9807ac457f734eab'
-                   '5b594ddc73f162d11bd619df124f479b4409393bc1d4c2ebe466d6d831039755')
+sha256sums_x86_64=('794fdfc8e65c203ae482f59df7e55050ddcf0a11af2a95eaa1a10c7d48ec7e0f'
+                   'aea6098a9cfe0de7a3979f4eb3be4053640052b0fe4648a70e6c682089cd9f8c')
 
 [[ "$CARCH" = "x86_64" ]] && _pkg="NVIDIA-Linux-x86_64-${pkgver}-no-compat32"
 

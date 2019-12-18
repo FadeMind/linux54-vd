@@ -12,7 +12,7 @@ index 2770d1a..f120062 100644
  EXTRA_CFLAGS += -I$(src)/common/inc
  EXTRA_CFLAGS += -I$(src)
  EXTRA_CFLAGS += -Wall -MD $(DEFINES) $(INCLUDES) -Wno-cast-qual -Wno-error -Wno-format-extra-args
- EXTRA_CFLAGS += -D__KERNEL__ -DMODULE -DNVRM -DNV_VERSION_STRING=\"440.36\" -Wno-unused-function -Wuninitialized -fno-strict-aliasing -mno-red-zone -mcmodel=kernel -DNV_UVM_ENABLE
+ EXTRA_CFLAGS += -D__KERNEL__ -DMODULE -DNVRM -DNV_VERSION_STRING=\"440.44\" -Wno-unused-function -Wuninitialized -fno-strict-aliasing -mno-red-zone -mcmodel=kernel -DNV_UVM_ENABLE
  EXTRA_CFLAGS += $(call cc-option,-Werror=undef,)
 diff --git a/kernel/conftest.sh b/kernel/conftest.sh
 index a54e2c0..80c29a6 100755

@@ -11,55 +11,51 @@ pkgbase=linux54-vd
 pkgname=('linux54-vd' 'linux54-vd-headers')
 _basekernel=5.4
 _kernelname=-vd
-_sub=4
+_sub=5
 kernelbase=${_basekernel}${_kernelname}
 pkgver=${_basekernel}.${_sub}
-pkgrel=2
+pkgrel=1
 arch=('x86_64')
 url="http://www.kernel.org/"
 license=('GPL2')
 makedepends=('xmlto' 'docbook-xsl' 'kmod' 'inetutils' 'bc' 'elfutils' 'git')
 options=('!strip')
 source=(https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-${pkgver}.tar.{xz,sign}
-        # the main kernel config files
-        'config.x86_64' 'config.vd' 'config.x200' 'config.x270' 'config.x570' 'x509.genkey' "${pkgbase}.preset"
-	#
-        # ARCH Patches
-        0001-arch-patches-20191217.patch::https://raw.githubusercontent.com/sirlucjan/kernel-patches/master/5.4/arch-patches-v4/0001-arch-patches.patch
-	#
+		# the main kernel config files
+		'config.x86_64' 'config.vd' 'config.x200' 'config.x270' 'config.x570' 'x509.genkey' "${pkgbase}.preset"
+		# ARCH Patches
+		0001-arch-patches-20191217.patch::https://raw.githubusercontent.com/sirlucjan/kernel-patches/master/5.4/arch-patches-v4/0001-arch-patches.patch
         # MANJARO Patches
         0001-amdgpu-Add-DC-feature-mask-to-disable-fractional-pwm.patch
         0002-amdgpu-nonupstream-navi10-vfio-reset.patch
-	#
-	# amdgpu backports
-	0001-amdgpu-sriov-vf-does-not-support-baco.patch
-	0002-amdgpu-fix-gfx-vf-flr-fail-on-navi.patch
-	0003-amdgpu-explicitly-wait-for-cp-idle.patch
-	0004-amdgpu-reinit-clear-state-buffer-after-reset.patch
-	#
-	# bmq scheduler
-	#bmq-5.4-20191125.patch::https://gitlab.com/alfredchen/bmq/raw/master/5.4/bmq_v5.4-r0.patch
-	#
+		# amdgpu backports
+		0001-amdgpu-sriov-vf-does-not-support-baco.patch
+		0002-amdgpu-fix-gfx-vf-flr-fail-on-navi.patch
+		0003-amdgpu-explicitly-wait-for-cp-idle.patch
+		0004-amdgpu-reinit-clear-state-buffer-after-reset.patch
+		0005-amdgpu-update-gfx-golden-settings-20191211.patch
+		0006-amdgpu-update-gfx-golden-settings-for-navi14-20191211.patch
+		# bmq scheduler
+		#bmq-5.4-20191125.patch::https://gitlab.com/alfredchen/bmq/raw/master/5.4/bmq_v5.4-r0.patch
         # sirlucjan
-	0001-futex-steam-fsync.patch::https://raw.githubusercontent.com/sirlucjan/kernel-patches/master/5.4/futex-patches-sep/0001-futex-Split-key-setup-from-key-queue-locking-and-rea.patch
-	0002-futex-steam-fsync.patch::https://raw.githubusercontent.com/sirlucjan/kernel-patches/master/5.4/futex-patches-sep/0002-futex-Implement-mechanism-to-wait-on-any-of-several-.patch
-	0003-futex-steam-fsync.patch::https://raw.githubusercontent.com/sirlucjan/kernel-patches/master/5.4/futex-patches-sep/0003-futex-Change-WAIT_MULTIPLE-opcode-to-31.patch
-	0001-clearlinux-tweak-intel-cpuidle.patch::https://raw.githubusercontent.com/clearlinux-pkgs/linux/master/0106-intel_idle-tweak-cpuidle-cstates.patch
-	0002-clearlinux-add-config-opt-for-raid6-bench.patch::https://raw.githubusercontent.com/clearlinux-pkgs/linux/master/0109-raid6-add-Kconfig-option-to-skip-raid6-benchmarking.patch
-	0003-clearlinux-init-ata-before-graphics.patch::https://raw.githubusercontent.com/clearlinux-pkgs/linux/master/0110-Initialize-ata-before-graphics.patch
-	#
-	# vd
-	0001-tune-vm-and-vfs-settings.patch
-	0002-tune-cfs-scheduler.patch
-	0003-optimise-module-compression.patch
-	0004-add-nvme-hwmon-temp.patch
-	0005-cpu-optimisations-graysky.patch
-	#
-	# hho
-	0001-enable-O3-opt-for-all-arches.patch::https://raw.githubusercontent.com/hhoffstaette/kernel-patches/5.4/5.4/kconfig-20191211-enable-O3-for-all-arches.patch
-	0002-mm-split-vmalloc_sync_all.patch::https://raw.githubusercontent.com/hhoffstaette/kernel-patches/5.4/5.4/mm-20191009-split-vmalloc_sync_all.patch
-	0003-block-perf-optimisations.patch
-	0004-net-disable-tcp-ssthresh-cache.patch::https://raw.githubusercontent.com/hhoffstaette/kernel-patches/5.4/5.4/net-20191209-disable-TCP-ssthresh-metrics-cache-by-default.patch
+		0001-futex-steam-fsync.patch::https://raw.githubusercontent.com/sirlucjan/kernel-patches/master/5.4/futex-patches-sep/0001-futex-Split-key-setup-from-key-queue-locking-and-rea.patch
+		0002-futex-steam-fsync.patch::https://raw.githubusercontent.com/sirlucjan/kernel-patches/master/5.4/futex-patches-sep/0002-futex-Implement-mechanism-to-wait-on-any-of-several-.patch
+		0003-futex-steam-fsync.patch::https://raw.githubusercontent.com/sirlucjan/kernel-patches/master/5.4/futex-patches-sep/0003-futex-Change-WAIT_MULTIPLE-opcode-to-31.patch
+		0001-clearlinux-tweak-intel-cpuidle.patch::https://raw.githubusercontent.com/clearlinux-pkgs/linux/master/0106-intel_idle-tweak-cpuidle-cstates.patch
+		0002-clearlinux-add-config-opt-for-raid6-bench.patch::https://raw.githubusercontent.com/clearlinux-pkgs/linux/master/0109-raid6-add-Kconfig-option-to-skip-raid6-benchmarking.patch
+		0003-clearlinux-init-ata-before-graphics.patch::https://raw.githubusercontent.com/clearlinux-pkgs/linux/master/0110-Initialize-ata-before-graphics.patch
+		# vd
+		0001-tune-vm-and-vfs-settings.patch
+		0002-tune-cfs-scheduler.patch
+		0003-optimise-module-compression.patch
+		0004-add-nvme-hwmon-temp.patch
+		0005-cpu-optimisations-graysky.patch
+		# hho
+		0001-enable-O3-opt-for-all-arches.patch::https://raw.githubusercontent.com/hhoffstaette/kernel-patches/5.4/5.4/kconfig-20191211-enable-O3-for-all-arches.patch
+		0002-mm-split-vmalloc_sync_all.patch::https://raw.githubusercontent.com/hhoffstaette/kernel-patches/5.4/5.4/mm-20191009-split-vmalloc_sync_all.patch
+		0003-introduce-list-for-each-continue.patch::https://raw.githubusercontent.com/hhoffstaette/kernel-patches/5.4/5.4/"list-20191129-introduce-list_for_each_continue().patch"
+		0004-block-perf-optimisations.patch
+		0005-net-disable-tcp-ssthresh-cache.patch::https://raw.githubusercontent.com/hhoffstaette/kernel-patches/5.4/5.4/net-20191209-disable-TCP-ssthresh-metrics-cache-by-default.patch
 )
 
 validpgpkeys=(
@@ -67,13 +63,13 @@ validpgpkeys=(
   '647F28654894E3BD457199BE38DBBDC86092693E'  # Greg Kroah-Hartman
 )
 
-sha256sums=('3fa2aad785f8031246b25362d7542dac46aaaa91546fb41b6419fb759e43e6c2'
+sha256sums=('568e9f27fbba86131c2e2849f296d54216e2ed3e8c4d8aa78a93b417cab23ec0'
             'SKIP'
             '02d7e00581c4592841ac121f451f39eaf901052ea44177d8c18eba5d994c3a80'
-            'b7ef90ef70e5fdf1265b32f00cc49dc191eb3e2c8f3c9e04c7d7abcf15ba6e79'
-            'e65a0a83f83c92075d04fe7c14c380915134d828c3708b7d60cc2a61f5c55f0e'
-            'd1a58b6f102d5f0a04a2553be0302c0bf9cdc4d00b9d08225d633e90210c6c40'
-            '3d631decf8131bcdfebcd2498d7e7f4ddca9a72f9e97122583dbce3988102a20'
+            'a86be5e02a6cf81e79b0d022dd560bb341ee1d7a6d7ab4256a19a6a0d4dd7580'
+            '975417fe2e60af9abe5743dee4b5170ce125cb669fb675c7f24b1c98e54defa6'
+            'e31f869bc553cc8e09fc1a5f50b3e3b5324d74b14b8674fe8e28816784a417be'
+            '50f5651c8a9ce3a19e93f372cc48bacbcc055cf41c4409ae0d8ef3d84e690e4a'
             'ab010dc5ef6ce85d352956e5996d242246ecd0912b30f0b72025c38eadff8cd5'
             'c14f60f37c5ef16d104aaa05fdc470f8d6d341181f5370b92918c283728e5625'
             'd3e2903a05d42412bbe7eb1c082208cc47f900e0f5aa9c9c3a470bd13c167a45'
@@ -83,12 +79,14 @@ sha256sums=('3fa2aad785f8031246b25362d7542dac46aaaa91546fb41b6419fb759e43e6c2'
             '1801216e75c7fc6569be04bc134d8233b6cbaa02f96d5eb58f18429bef724683'
             'fcf767648859ef8ff6a90b598207548ad81a8bf68be75c402ef50a1afb10c3ed'
             'ebb35c21509e4acddff0f912c85bda501ab4eefd2f0bb976c28e4301bf27eda3'
+            'ddbc236dcd79174cbb73552453927062af2bb86a5ae97f2631445993be912845'
+            '7fbf6328c7df3a98e409c12e66c9584ed57dd717328281d886739c1855e1a1e4'
             'fd1f34cf87e72ccd6070590028ad34e12dc42285637a0c61894680cb81d4fb88'
             '9660f0d31bdc5718b7fde41015898f67dce86602886585848d6300dfce2542db'
             'cd228e4b62cab5679c93cd0eda5d96d570f1b3ba84340eddd2d049f2a07eef9d'
             '88b5597753b01f90f77b99580943263969902ffc084972f8843e0659fdd5eb8f'
             '47d26eb8a2ec74b3684ab61837ecfcdad5cdc40722ca01a32684dfdd3775fafc'
-            '6cf992514973b94cffe81b5547a8c76c0ccd03f7bafc1a234c5af4ba34cc1a9d'
+            'b4a3d140bc93e4d224570c0f6b87c40c64148571588064858fcdc9f2406feeaa'
             'f4041dc77564ee6de09c1c02c59068b8eceb6fbdbe60158acdec0a0cfb5cb3f7'
             '949360a832de6c4951433607444c55369703f8a030455609729d7cf11aca7efc'
             '0d6fbf9a5206529d6791d41767ec254f0040d053713092b5fbb21fbe7f3604b7'
@@ -96,6 +94,7 @@ sha256sums=('3fa2aad785f8031246b25362d7542dac46aaaa91546fb41b6419fb759e43e6c2'
             '607097f22f202cd829f12acce7a401fb7f7af5678ffeda90c1fc7da71b895ad7'
             '21eac56173eb18959bbf02c1687dc7fa2c5d1df063ec90e6507f0008ce88bbef'
             '47844884e429ffc395f51610825271c2549d2ab28b52251407d5b4f8a21fe1d9'
+            '7f9aa69187e7d197017c6bb15b623330e050a27ba384a3894cbd3e347fdd8a83'
             'b37b2132e97357201e039872c595da18aade6a64743d35ec33ebfd4d4851c3f4'
             '9c006e4845c22808c954ca2374a2a9dd927c192e4bdaf0d00c6abc559831106e')
 
@@ -116,14 +115,14 @@ prepare() {
 
   # apply patch from the source array (should be a pacman feature)
   local filename filename2
-    for filename in "${source[@]}"; do
-    	if [[ "$filename" =~ \.patch$ ]]; then
+  for filename in "${source[@]}"; do
+  	if [[ "$filename" =~ \.patch$ ]]; then
 		filename="${filename%%::*}"
 		filename2="${filename#*-}"
         	echo -e "\n---- Applying patch ${TBOLD}${filename2%%.*}${TNORMAL}:"
         	patch -Np1 -i "$srcdir/${filename}"
-        fi
-    done
+  	fi
+  done
 
   cat ../x509.genkey > ./certs/x509.genkey
 
@@ -179,7 +178,6 @@ prepare() {
 
   # get kernel version
   make prepare
-
   make -s kernelrelease > version
   printf '\n'
   msg2 "Prepared %s version %s" "$pkgbase" "$(<version)"
@@ -332,11 +330,11 @@ package_linux54-vd-headers() {
       application/x-pie-executable\;*) # Relocatable binaries
         strip -v $STRIP_SHARED "$file" ;;
     esac
-  done < <(find "${_builddir}" -type f -perm -u+w -print0 2>/dev/null)
+  done < <(find "${_builddir}" -type f -perm -u+x ! -name vmlinux -print0)
 
   # Fix permissions
   printf '\n'
   msg2 "Fixing permissions..."
-  chmod -R u=rwX,go=rX "${_builddir}"
+  chmod -Rc u=rwX,go=rX "${pkgdir}"
 }
 
